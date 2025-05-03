@@ -1,9 +1,10 @@
 package org.justiks.telegram.routers;
 
-public class MessagesRouter<T> implements Router<T> {
+import org.telegram.telegrambots.meta.api.objects.Update;
 
-    @Override
-    public void route(T t) {
+public class MessagesRouter extends BaseRouter<Update> {
+    public MessagesRouter() {
 
     }
+
 }

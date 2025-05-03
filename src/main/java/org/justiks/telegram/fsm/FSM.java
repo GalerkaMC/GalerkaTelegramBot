@@ -1,6 +1,8 @@
 package org.justiks.telegram.fsm;
 
 
+import org.justiks.telegram.fsm.states.State;
+
 import java.util.HashMap;
 
 /**
@@ -51,8 +53,15 @@ public class FSM {
      * @param userId telegram user id
      * @param state  UserState
      */
-    public void addState(Long userId, UserState state) {
-        states.put(userId, state);
+    public void addState(Long userId, State state) {
+        // update UserState if exists
+        if (states.containsKey(userId)) {
+            states.get(userId).currentState = state;
+        }
+
+        // else create new state
+        UserState userState = new UserState(state);
+        states.put(userId, userState);
     }
 
     /**

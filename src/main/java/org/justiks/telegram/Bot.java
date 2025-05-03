@@ -1,6 +1,8 @@
 package org.justiks.telegram;
 
+import okhttp3.OkHttpClient;
 import org.justiks.telegram.routers.MainRouter;
+import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -17,11 +19,24 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
     private static final Bot instance = new Bot();
 
     /**
+     * telegram client
+     */
+    private final OkHttpTelegramClient telegramClient = new OkHttpTelegramClient("6664274548:AAG2ouZjFypnzMXrgPk79U8qWCBxOtlUmaM");
+
+    /**
      * Instance getter
      * @return Bot instance
      */
     public static Bot getInstance() {
         return instance;
+    }
+
+    /**
+     * telegram client getter
+     * @return telegram client
+     */
+    public OkHttpTelegramClient getTelegramClient() {
+        return telegramClient;
     }
 
     /**
