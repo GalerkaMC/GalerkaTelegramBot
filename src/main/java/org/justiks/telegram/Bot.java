@@ -45,6 +45,13 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
     private Bot() {}
 
     /**
+     * Create database tables if no exists
+     */
+    private void createTables() {
+        // TODO: Создай таблицы
+    }
+
+    /**
      * Consume update from telegram
      * @param update update from telegram API
      */

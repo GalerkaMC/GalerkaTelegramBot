@@ -2,8 +2,11 @@ package org.justiks.telegram.routers;
 
 import org.justiks.telegram.Bot;
 import org.justiks.telegram.fsm.FSM;
+import org.justiks.telegram.fsm.UserState;
 import org.justiks.telegram.fsm.states.RequestToWhitelistState;
 import org.justiks.telegram.fsm.states.State;
+import org.justiks.telegram.whitelist_request.WhitelistRequest;
+import org.justiks.telegram.whitelist_request.WhitelistRequestsManager;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -225,10 +228,13 @@ public class FSMRouter extends BaseRouter<Update> {
         String message = update.getMessage().getText();
         Long userId = update.getMessage().getFrom().getId();
 
+        UserState userState = FSM.getInstance().getState(userId);
+        userState.setValueForCurrentState(message);
 
-        FSM.getInstance().getState(userId).setValueForCurrentState(message);
-
-        // TODO: Send request to admins
+        // create WhitelistRequest and send request to admins chat
+        WhitelistRequest whitelistRequest = new WhitelistRequest(update, userState);
+        WhitelistRequestsManager.getInstance().add(whitelistRequest);
+        whitelistRequest.sendRequestToAdminsChat();
 
         try {
             Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), "Отлично, заявка успешно отправлена! Ожидайте ответа"));
@@ -236,10 +242,4 @@ public class FSMRouter extends BaseRouter<Update> {
             throw new RuntimeException(e);
         }
     }
-
-
-    private void sendMessageToAdminsChat(Update update) {
-
-    }
-
 }

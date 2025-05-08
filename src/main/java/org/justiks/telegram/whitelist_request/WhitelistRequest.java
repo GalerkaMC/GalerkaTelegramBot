@@ -3,6 +3,7 @@ package org.justiks.telegram.whitelist_request;
 
 import org.jetbrains.annotations.Nullable;
 import org.justiks.telegram.Bot;
+import org.justiks.telegram.External;
 import org.justiks.telegram.fsm.UserState;
 import org.justiks.telegram.fsm.states.RequestToWhitelistState;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -24,6 +25,7 @@ public class WhitelistRequest {
     // messages
     private static final String REQUEST_MESSAGE = "Новая заявка от игрока %s:\n\nЮзернейм в телеграм: %s\n\nПолное имя в телеграм: %s\n\nMinecraft никнейм: %s\n\nЕсть лицензия: %s\n\nУчился на Коде будущего: %s\n\nНе много о себе: %s";
     private static final String REQUEST_WAS_REJECTED = "Ваша заявка на попадание в белый список была отклонена.\n\nЗа подробностями писать @Justiks";
+    private static final String REQUEST_ACCEPTED = "Ваша заявка в whitelist была одобрена!\nОдноразовый токен регистрации - %s\n\nПриятной игры!";
 
     /**
      * player telegram user id
@@ -128,7 +130,17 @@ public class WhitelistRequest {
      * call it, if whitelist request is accepted
      * add to whitelist and write to database
      */
-    public void acceptWhitelistRequest() {}
+    public void acceptWhitelistRequest() {
+        String token = External.addToWhitelist(nickname);
+        String message = String.format(REQUEST_ACCEPTED, token);
+
+        try {
+            Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(telegramUserId.toString(), message));
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+        // TODO: add to database
+    }
 
     /**
      * call it if whitelist request was rejected

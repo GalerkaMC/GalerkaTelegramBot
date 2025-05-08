@@ -5,8 +5,22 @@ import java.util.HashMap;
 
 /**
  * whitelist requests manager. Contains all WhitelistRequests object in hashmap, and manage it
+ * singleton
  */
 public class WhitelistRequestsManager {
+
+
+    /**
+     * singleton instance
+     */
+    private static final WhitelistRequestsManager instance = new WhitelistRequestsManager();
+
+    /**
+     * instance getter
+     * @return instance of WhitelistRequestsManager
+     */
+    public static WhitelistRequestsManager getInstance() {return instance;}
+
 
     /**
      * hashmap with all WhitelistRequest objects

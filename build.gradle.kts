@@ -17,6 +17,7 @@ dependencies {
     implementation("org.telegram:telegrambots-longpolling:8.3.0")
     implementation("org.telegram:telegrambots-client:8.3.0")
     implementation("org.telegram:telegrambots-meta:8.3.0")
+    implementation("org.xerial:sqlite-jdbc:3.42.0.0")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
