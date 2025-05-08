@@ -31,6 +31,11 @@ public class FSMRouter extends BaseRouter<Update> {
     private static final String ABOUT_ME_MESSAGE = "Отлично! Последний шаг, расскажи не много о себе";
 
     /**
+     * chat with requests
+     */
+    private static final long ADMINS_CHAT = 1;
+
+    /**
      * constructor
      */
     public FSMRouter() {
@@ -230,6 +235,11 @@ public class FSMRouter extends BaseRouter<Update> {
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    private void sendMessageToAdminsChat(Update update) {
+
     }
 
 }

@@ -18,7 +18,7 @@ public class CommandRouter extends BaseRouter<Update> {
     private final String START_COMMAND_MESSAGE = "Привет! Чтобы подать заявку в вайтлист используй /request!";
     private final String NEW_REQUEST_COMMAND_MESSAGE = "Привет! Напиши свой будущий ник в Minecraft";
 
-    private CommandRouter() {
+    public CommandRouter() {
         addHandler(update -> update.getMessage().getText().equals("/start"), this::startCommandExecutor);
         addHandler(update -> update.getMessage().getText().equals("/request"), this::requestCommandExecutor);
         addHandler(update -> update.getMessage().getText().equals("/cancel"), this::clearCommandExecutor);

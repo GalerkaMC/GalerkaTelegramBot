@@ -44,5 +44,13 @@ public class UserState {
         currentState = currentState.getNext();
     }
 
+    /**
+     * get value from values by state. private set public get
+     * @param state key of value
+     */
+    public Object getValueByState(State state) {
+        return values.get(state);
+    }
+
 
 }
