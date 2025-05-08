@@ -14,9 +14,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class CommandRouter extends BaseRouter<Update> {
 
     // consts
-    private String CANCEL_STATE_MESSAGE = "Действие успешно отменено!";
-    private String START_COMMAND_MESSAGE = "Привет! Чтобы подать заявку в вайтлист используй /request!";
-    private String NEW_REQUEST_COMMAND_MESSAGE = "Привет! Напиши свой будущий ник в Minecraft";
+    private final String CANCEL_STATE_MESSAGE = "Действие успешно отменено!";
+    private final String START_COMMAND_MESSAGE = "Привет! Чтобы подать заявку в вайтлист используй /request!";
+    private final String NEW_REQUEST_COMMAND_MESSAGE = "Привет! Напиши свой будущий ник в Minecraft";
 
     private CommandRouter() {
         addHandler(update -> update.getMessage().getText().equals("/start"), this::startCommandExecutor);
