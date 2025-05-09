@@ -14,6 +14,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 
 /**
  * router for finite state machine
@@ -235,6 +240,15 @@ public class FSMRouter extends BaseRouter<Update> {
         WhitelistRequest whitelistRequest = new WhitelistRequest(update, userState);
         WhitelistRequestsManager.getInstance().add(whitelistRequest);
         whitelistRequest.sendRequestToAdminsChat();
+
+        // add to database
+        try (Connection connection = DriverManager.getConnection(Bot.DATABASE_PATH)) {
+            String request = "INSERT INTO who_already_request VALUES (?)";
+            PreparedStatement statement = connection.prepareStatement(request);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         try {
             Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), "Отлично, заявка успешно отправлена! Ожидайте ответа"));
