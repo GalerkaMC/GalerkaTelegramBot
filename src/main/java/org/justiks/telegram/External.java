@@ -24,4 +24,14 @@ public class External {
         return false;
     }
 
+    /**
+     * Checks the player and password.
+     * @param nickname player minecraft nickname
+     * @param password player password
+     * @return If password is correct - return true, else false
+     */
+    public static boolean playerAuth(String nickname, String password) {
+        return false;
+    }
+
 }

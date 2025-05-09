@@ -6,6 +6,7 @@ import org.justiks.telegram.Bot;
 import org.justiks.telegram.External;
 import org.justiks.telegram.fsm.UserState;
 import org.justiks.telegram.fsm.states.RequestToWhitelistState;
+import org.sqlite.SQLiteException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -13,6 +14,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.sql.*;
 
 /**
  * whitelist request class
@@ -104,9 +107,9 @@ public class WhitelistRequest {
         InlineKeyboardButton acceptButton = new InlineKeyboardButton("Принять ✅");
         InlineKeyboardButton rejectButton = new InlineKeyboardButton("Отклонить ❌");
 
-        // callback should be like userId:accept userId:reject. Example 12345:accept
-        acceptButton.setCallbackData(telegramUserId + ":accept");
-        rejectButton.setCallbackData(telegramUserId + ":reject");
+        // callback should be like command:userId:accept command:userId:reject. Example whitelist_add:12345:accept
+        acceptButton.setCallbackData("whitelist_add:" + telegramUserId + ":accept");
+        rejectButton.setCallbackData("whitelist_add:" + telegramUserId + ":reject");
 
         InlineKeyboardRow inlineKeyboardRow = new InlineKeyboardRow();
         inlineKeyboardRow.add(acceptButton);
@@ -132,14 +135,25 @@ public class WhitelistRequest {
      */
     public void acceptWhitelistRequest() {
         String token = External.addToWhitelist(nickname);
-        String message = String.format(REQUEST_ACCEPTED, token);
 
+        // add to database linked
+        try (Connection connection = DriverManager.getConnection(Bot.DATABASE_PATH)) {
+            String request = "INSERT INTO linked_users (user_id, nickname) VALUES (?, ?)";
+            PreparedStatement statement = connection.prepareStatement(request);
+            statement.setLong(1, telegramUserId);
+            statement.setString(2, nickname);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        // send message
+        String message = String.format(REQUEST_ACCEPTED, token);
         try {
             Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(telegramUserId.toString(), message));
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
-        // TODO: add to database
     }
 
     /**

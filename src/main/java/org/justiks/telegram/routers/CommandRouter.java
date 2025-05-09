@@ -25,6 +25,8 @@ public class CommandRouter extends BaseRouter<Update> {
 
     private static final String DATABASE_PATH = "jdbc:sqlite:database.db";
 
+
+    // TODO: Fix commands with args
     public CommandRouter() {
         addHandler(update -> update.getMessage().getText().equals("/start"), this::startCommandExecutor);
         addHandler(update -> update.getMessage().getText().equals("/request"), this::requestCommandExecutor);
