@@ -1,7 +1,7 @@
 package org.justiks.telegram.routers;
 
-import org.jetbrains.annotations.Nullable;
 import org.justiks.telegram.Bot;
+import org.justiks.telegram.External;
 import org.justiks.telegram.fsm.FSM;
 import org.justiks.telegram.fsm.states.RequestToWhitelistState;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -22,16 +22,19 @@ public class CommandRouter extends BaseRouter<Update> {
     private static final String NEW_REQUEST_COMMAND_MESSAGE = "Привет! Напиши свой будущий ник в Minecraft";
     private static final String REQUEST_ALREADY_SEND = "Ты уже отправлял заявку на попадание в белый список, можно отправить только одну. Если не согласен - @Justiks";
     private static final String GIFT_ALREADY_GET = "Ты уже получал подарок! Если не согласен - @Justiks";
+    private static final String ACCOUNT_ALREADY_LINKED = "К этому телеграм аккаунту уже привязан другой Minecraft аккаунт!";
+    private static final String INCORRECT_LOGIN_OR_PASSWORD = "Некорректный никнейм или пароль! Если это не так - @Justiks";
 
     private static final String DATABASE_PATH = "jdbc:sqlite:database.db";
 
 
     // TODO: Fix commands with args
     public CommandRouter() {
-        addHandler(update -> update.getMessage().getText().equals("/start"), this::startCommandExecutor);
-        addHandler(update -> update.getMessage().getText().equals("/request"), this::requestCommandExecutor);
-        addHandler(update -> update.getMessage().getText().equals("/cancel"), this::clearCommandExecutor);
-        addHandler(update -> update.getMessage().getText().equals("/get_gift"), this::getGiftCommandExecutor);
+
+        addHandler(update -> update.getMessage().getText().startsWith("/start"), this::startCommandExecutor);
+        addHandler(update -> update.getMessage().getText().startsWith("/request"), this::requestCommandExecutor);
+        addHandler(update -> update.getMessage().getText().startsWith("/cancel"), this::clearCommandExecutor);
+        addHandler(update -> update.getMessage().getText().startsWith("/get_gift"), this::getGiftCommandExecutor);
     }
 
     // command executors
@@ -102,7 +105,7 @@ public class CommandRouter extends BaseRouter<Update> {
 
         try {
             // if request has already been sent - cancel action
-            if (!requestExists) {
+            if (requestExists) {
                 Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), REQUEST_ALREADY_SEND));
                 return;
             }
@@ -150,6 +153,48 @@ public class CommandRouter extends BaseRouter<Update> {
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    /**
+     * TODO: add cooldown for this command
+     * /link command executor
+     * link minecraft account to telegram
+     * this command have arguments, use /link <nickname> <password>
+     * @param update telegram update
+     */
+    private void linkCommandExecutor(Update update) {
+        Long userId = update.getMessage().getFrom().getId();
+
+        try {
+
+            // check telegram account, does it have a link to minecraft account
+            try (Connection connection = DriverManager.getConnection(DATABASE_PATH)) {
+                String request = "SELECT user_id FROM linked_users WHERE user_id = ?";
+                PreparedStatement statement = connection.prepareStatement(request);
+                statement.setLong(1, userId);
+                ResultSet resultSet = statement.executeQuery();
+
+                if (resultSet.next()) {
+                    Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), ACCOUNT_ALREADY_LINKED));
+                }
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            String[] split_message = update.getMessage().getText().split(" ");
+
+            String nickname = split_message[1];
+            String password = split_message[2];
+
+            if (External.playerAuth(nickname, password)) {
+
+            } else {
+                Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), INCORRECT_LOGIN_OR_PASSWORD));
+            }
+
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

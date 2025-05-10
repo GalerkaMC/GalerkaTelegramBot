@@ -30,7 +30,7 @@ public class UserState {
         State temproraryState = firstState;
         while (temproraryState != null) {
             values.put(temproraryState, null);
-            temproraryState = firstState.getNext();
+            temproraryState = temproraryState.getNext();
         }
     }
 

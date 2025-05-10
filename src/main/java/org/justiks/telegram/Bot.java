@@ -20,14 +20,9 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
     // constants
 
     /**
-     * telegram bot token
-     */
-    private static final String BOT_TOKEN = "6664274548:AAG2ouZjFypnzMXrgPk79U8qWCBxOtlUmaM";
-
-    /**
      * jdbc sqlite3 database path. Use it in DriverManager.getConnection()
      */
-    public static final String DATABASE_PATH = "jdbc:sqlite3:database.db";
+    public static final String DATABASE_PATH = "jdbc:sqlite:database.db";
 
 
     /**
@@ -38,7 +33,7 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
     /**
      * telegram client
      */
-    private final OkHttpTelegramClient telegramClient = new OkHttpTelegramClient(BOT_TOKEN);
+    private OkHttpTelegramClient telegramClient;
 
     /**
      * Instance getter
@@ -122,7 +117,9 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
         // attempt to create database tables
         createTables();
 
-        try (TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication()) {
+        try {
+            TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
+            telegramClient = new OkHttpTelegramClient(token);
             botsApplication.registerBot(token, instance);
         } catch (Exception e) {
             throw new RuntimeException(e);
