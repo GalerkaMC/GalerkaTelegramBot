@@ -4,8 +4,10 @@ import org.justiks.telegram.Bot;
 import org.justiks.telegram.External;
 import org.justiks.telegram.fsm.FSM;
 import org.justiks.telegram.fsm.states.RequestToWhitelistState;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.sql.*;
@@ -27,9 +29,17 @@ public class CommandRouter extends BaseRouter<Update> {
     private static final String LINK_NOT_ENOUGH_ARGUMENTS = "Недостаточно аргументов, используйте /link <nickname> <password>";
     private static final String SUCCESSFUL_LINKED = "Аккаунт успешно привязан!";
     private static final String DATABASE_PATH = "jdbc:sqlite:database.db";
+    private static final String FAIL_SUBSCRIBE_CHECK = "Вы не являетесь подписчиком этого канала!";
+    private static final String ACCOUNT_IS_NOT_LINKED = "К этому телеграмм-аккаунту не привязан ни один Minecraft аккаунт. Для получения подарка привяжите аккаунт (Используйте команду /link или подайте заявку в whitelsit)";
+    private static final String GIFT_SUCCESSFUL_RECEIVED = "Вы успешно получили подарок!";
+
+    /**
+     * channel where need check player subscribe
+     */
+    private static final String CHECK_SUBSCRIBE_CHANNEL = "-1002382327240";
 
 
-    // TODO: Fix commands with args
+
     public CommandRouter() {
 
         addHandler(update -> update.getMessage().getText().startsWith("/start"), this::startCommandExecutor);
@@ -129,7 +139,7 @@ public class CommandRouter extends BaseRouter<Update> {
         Long userId = update.getMessage().getFrom().getId();
 
         // false if request by this player no exists,private static final String else true
-        boolean giftAlreadyGet = false;
+        boolean giftAlreadyGet;
 
         // check users exists in giftedUsers table
         try (Connection connection = DriverManager.getConnection(Bot.DATABASE_PATH)) {
@@ -142,7 +152,6 @@ public class CommandRouter extends BaseRouter<Update> {
             throw new RuntimeException(e);
         }
 
-
         try {
             // if gift already get - cancel
             if (!giftAlreadyGet) {
@@ -150,7 +159,55 @@ public class CommandRouter extends BaseRouter<Update> {
                 return;
             }
 
-            // TODO: get gift logic
+
+            // check users exists in linked users
+            boolean isLinkedAccount;
+            String nickname;
+
+            try (Connection connection = DriverManager.getConnection(Bot.DATABASE_PATH)) {
+                String request = "SELECT user_id, nickname FROM linked_users WHERE user_id = ?";
+                PreparedStatement statement = connection.prepareStatement(request);
+                statement.setLong(1, userId);
+                ResultSet resultSet = statement.executeQuery();
+                isLinkedAccount = resultSet.next();
+                nickname = resultSet.getString("nickname");
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            // if telegram account is not linked
+            if (!isLinkedAccount) {
+                Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), ACCOUNT_IS_NOT_LINKED));
+                return;
+            }
+
+            // check subscribe
+            ChatMember chatMember = Bot.getInstance().getTelegramClient().execute(new GetChatMember(CHECK_SUBSCRIBE_CHANNEL, userId));
+            String status = chatMember.getStatus();
+
+            // if player is not subscribed
+            if (!(status.equals("member") || status.equals("administrator") || status.equals("creator"))) {
+                Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), FAIL_SUBSCRIBE_CHECK));
+                return;
+            }
+
+            boolean result = External.giveGift(nickname);
+
+            if (result) {
+                // add user to gifted_users table
+                try (Connection connection = DriverManager.getConnection(DATABASE_PATH)) {
+                    String request = "INSERT INTO gifted_users VALUES (?, ?)";
+                    PreparedStatement statement = connection.prepareStatement(request);
+                    statement.setLong(1, userId);
+                    statement.setString(2, nickname);
+                    statement.executeUpdate();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+
+                Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), GIFT_SUCCESSFUL_RECEIVED));
+            }
+
 
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);

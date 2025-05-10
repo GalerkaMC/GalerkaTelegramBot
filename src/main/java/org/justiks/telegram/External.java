@@ -34,4 +34,13 @@ public class External {
         return true;
     }
 
+    /**
+     * give gift for player
+     * @param nickname player nickname
+     * @return boolean, true if task completed successful, else false
+     */
+    public static boolean giveGift(String nickname) {
+        return true;
+    }
+
 }
