@@ -31,7 +31,7 @@ public class External {
      * @return If password is correct - return true, else false
      */
     public static boolean playerAuth(String nickname, String password) {
-        return false;
+        return true;
     }
 
 }

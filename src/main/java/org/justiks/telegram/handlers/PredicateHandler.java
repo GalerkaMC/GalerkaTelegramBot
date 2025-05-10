@@ -25,8 +25,15 @@ public class PredicateHandler <T> implements Handler<T> {
 
     @Override
     public void handle(T update) {
-        if (predicate.test(update)) {
-            handler.handle(update);
-        }
+        handler.handle(update);
+    }
+
+    /**
+     * run predicate.test(). Run this handler?
+     * @param update T
+     * @return true if predicate is true, else false
+     */
+    public boolean testPredicate(T update) {
+        return predicate.test(update);
     }
 }

@@ -6,7 +6,6 @@ import org.justiks.telegram.Bot;
 import org.justiks.telegram.External;
 import org.justiks.telegram.fsm.UserState;
 import org.justiks.telegram.fsm.states.RequestToWhitelistState;
-import org.sqlite.SQLiteException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -23,10 +22,10 @@ import java.sql.*;
 public class WhitelistRequest {
 
     // constants
-    private static final String ADMINS_CHAT = Long.toString(1);
+    private static final String ADMINS_CHAT = "-1002590134862";
 
     // messages
-    private static final String REQUEST_MESSAGE = "Новая заявка от игрока %s:\n\nЮзернейм в телеграм: %s\n\nПолное имя в телеграм: %s\n\nMinecraft никнейм: %s\n\nЕсть лицензия: %s\n\nУчился на Коде будущего: %s\n\nНе много о себе: %s";
+    private static final String REQUEST_MESSAGE = "Новая заявка от игрока %s:\n\nЮзернейм в телеграм: @%s\nПолное имя в телеграм: %s\nMinecraft никнейм: %s\nЕсть лицензия: %s\nУчился на Коде будущего: %s\nНе много о себе: %s";
     private static final String REQUEST_WAS_REJECTED = "Ваша заявка на попадание в белый список была отклонена.\n\nЗа подробностями писать @Justiks";
     private static final String REQUEST_ACCEPTED = "Ваша заявка в whitelist была одобрена!\nОдноразовый токен регистрации - %s\n\nПриятной игры!";
 

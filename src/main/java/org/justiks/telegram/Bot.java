@@ -68,7 +68,7 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
                     "CREATE TABLE IF NOT EXISTS users (user_id INT PRIMARY KEY)";
             // nickname is primary key because search by nickname more often than by user_id
             String createLinkedAccounts =
-                    "CREATE TABLE IF NOT EXISTS linked_users (nickname TEXT PRIMARY KEY, user_id INT UNIQUE, FOREIGN KEY(user_id) REFERENCES users(user_id))";
+                    "CREATE TABLE IF NOT EXISTS linked_users (user_id INT UNIQUE, nickname TEXT PRIMARY KEY, FOREIGN KEY(user_id) REFERENCES users(user_id))";
             // users who already get gift
             String giftedUsers = "CREATE TABLE IF NOT EXISTS gifted_users (user_id INT PRIMARY KEY, player TEXT UNIQUE, FOREIGN KEY (user_id) REFERENCES users(user_id))";
 

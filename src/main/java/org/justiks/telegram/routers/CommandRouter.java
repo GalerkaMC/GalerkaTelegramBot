@@ -24,7 +24,8 @@ public class CommandRouter extends BaseRouter<Update> {
     private static final String GIFT_ALREADY_GET = "Ты уже получал подарок! Если не согласен - @Justiks";
     private static final String ACCOUNT_ALREADY_LINKED = "К этому телеграм аккаунту уже привязан другой Minecraft аккаунт!";
     private static final String INCORRECT_LOGIN_OR_PASSWORD = "Некорректный никнейм или пароль! Если это не так - @Justiks";
-
+    private static final String LINK_NOT_ENOUGH_ARGUMENTS = "Недостаточно аргументов, используйте /link <nickname> <password>";
+    private static final String SUCCESSFUL_LINKED = "Аккаунт успешно привязан!";
     private static final String DATABASE_PATH = "jdbc:sqlite:database.db";
 
 
@@ -35,6 +36,7 @@ public class CommandRouter extends BaseRouter<Update> {
         addHandler(update -> update.getMessage().getText().startsWith("/request"), this::requestCommandExecutor);
         addHandler(update -> update.getMessage().getText().startsWith("/cancel"), this::clearCommandExecutor);
         addHandler(update -> update.getMessage().getText().startsWith("/get_gift"), this::getGiftCommandExecutor);
+        addHandler(update -> update.getMessage().getText().startsWith("/link"), this::linkCommandExecutor);
     }
 
     // command executors
@@ -126,7 +128,7 @@ public class CommandRouter extends BaseRouter<Update> {
     private void getGiftCommandExecutor(Update update) {
         Long userId = update.getMessage().getFrom().getId();
 
-        // false if request by this player no exists, else true
+        // false if request by this player no exists,private static final String else true
         boolean giftAlreadyGet = false;
 
         // check users exists in giftedUsers table
@@ -167,6 +169,15 @@ public class CommandRouter extends BaseRouter<Update> {
 
         try {
 
+            // get args from message
+            String[] split_message = update.getMessage().getText().split(" ");
+
+            // check arguments amount
+            if (split_message.length < 3) {
+                Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), LINK_NOT_ENOUGH_ARGUMENTS));
+                return;
+            }
+
             // check telegram account, does it have a link to minecraft account
             try (Connection connection = DriverManager.getConnection(DATABASE_PATH)) {
                 String request = "SELECT user_id FROM linked_users WHERE user_id = ?";
@@ -176,18 +187,30 @@ public class CommandRouter extends BaseRouter<Update> {
 
                 if (resultSet.next()) {
                     Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), ACCOUNT_ALREADY_LINKED));
+                    return;
                 }
 
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
 
-            String[] split_message = update.getMessage().getText().split(" ");
-
             String nickname = split_message[1];
             String password = split_message[2];
 
             if (External.playerAuth(nickname, password)) {
+
+                // Add player to linked_users table
+                try (Connection connection = DriverManager.getConnection(DATABASE_PATH)) {
+                    String request = "INSERT INTO linked_users VALUES (?, ?)";
+                    PreparedStatement preparedStatement = connection.prepareStatement(request);
+                    preparedStatement.setLong(1, userId);
+                    preparedStatement.setString(2, nickname);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+
+                Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), SUCCESSFUL_LINKED));
 
             } else {
                 Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), INCORRECT_LOGIN_OR_PASSWORD));

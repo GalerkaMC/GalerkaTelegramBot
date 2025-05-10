@@ -10,6 +10,7 @@ import org.justiks.telegram.whitelist_request.WhitelistRequestsManager;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -37,11 +38,7 @@ public class FSMRouter extends BaseRouter<Update> {
     private static final String YES_I_STUDENT = "Да, я обучался";
     private static final String NO_I_NOT_STUDENT = "Нет, я не обучался";
     private static final String ABOUT_ME_MESSAGE = "Отлично! Последний шаг, расскажи не много о себе";
-
-    /**
-     * chat with requests
-     */
-    private static final long ADMINS_CHAT = 1;
+    private static final String WAIT_ANSWER = "Ваша заявка принята, ожидайте ответа!";
 
     /**
      * constructor
@@ -216,8 +213,10 @@ public class FSMRouter extends BaseRouter<Update> {
             }
 
             // if message is valid
+            SendMessage message = new SendMessage(userId.toString(), ABOUT_ME_MESSAGE);
+            message.setReplyMarkup(new ReplyKeyboardRemove(true));
 
-            Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), ABOUT_ME_MESSAGE));
+            Bot.getInstance().getTelegramClient().executeAsync(message);
 
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
@@ -245,13 +244,16 @@ public class FSMRouter extends BaseRouter<Update> {
         try (Connection connection = DriverManager.getConnection(Bot.DATABASE_PATH)) {
             String request = "INSERT INTO who_already_request VALUES (?)";
             PreparedStatement statement = connection.prepareStatement(request);
+            statement.setLong(1, userId);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
         try {
-            Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), "Отлично, заявка успешно отправлена! Ожидайте ответа"));
+            // send message
+            SendMessage sendMessage = new SendMessage(userId.toString(), WAIT_ANSWER);
+            Bot.getInstance().getTelegramClient().executeAsync(sendMessage);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }

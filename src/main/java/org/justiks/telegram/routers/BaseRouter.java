@@ -16,7 +16,7 @@ public abstract class BaseRouter<T> implements Router<T> {
     /**
      * iter it, for call all handlers in router
      */
-    protected final List<Handler<T>> handlers = new ArrayList<>();
+    protected final List<PredicateHandler<T>> handlers = new ArrayList<>();
 
     /**
      * add handler to handlers list
@@ -29,8 +29,11 @@ public abstract class BaseRouter<T> implements Router<T> {
 
     @Override
     public void route(T t) {
-        for (Handler<T> handler : handlers) {
-            handler.handle(t);
+        for (PredicateHandler<T> handler : handlers) {
+            if (handler.testPredicate(t)) {
+                handler.handle(t);
+                return;
+            }
         }
     }
 }
