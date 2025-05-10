@@ -27,18 +27,18 @@ import java.sql.SQLException;
 public class FSMRouter extends BaseRouter<Update> {
 
     // messages
-    private static final String NO_TEXT = "Ты отправил сообщение без текста!";
-    private static final String INCORRECT_NICKNAME_LENGTH = "Некорректная длина никнейма!\n\nДлина никнейма от 3 до 16 символов";
-    private static final String ILLEGAL_NICKNAME_SYMBOLS = "Недопустимые символы в никнейме! Используй латинские буквы, цифры и нижние подчеркивания!";
+    private static final String NO_TEXT = "❌ Ты отправил сообщение без текста!";
+    private static final String INCORRECT_NICKNAME_LENGTH = "❌ Некорректная длина никнейма!\n\nДлина никнейма от 3 до 16 символов";
+    private static final String ILLEGAL_NICKNAME_SYMBOLS = "❌ Недопустимые символы в никнейме! Используй латинские буквы, цифры и нижние подчеркивания!";
     private static final String HAS_LICENCE_MESSAGE = "Отлично, у тебя есть Minecraft лицензия?";
     private static final String YES_I_HAVE_MINECRAFT_LICENSE = "Да, у меня есть лицензия";
     private static final String NO_I_HAVE_NOT_MINECRAFT_LICENSE = "Нет, у меня нет Minecraft лицензии";
-    private static final String INVALID_ANSWER_USE_BUTTONS = "Для ответа на вопрос используй кнопки!";
+    private static final String INVALID_ANSWER_USE_BUTTONS = "❌ Для ответа на вопрос используй кнопки!";
     private static final String IS_CODE_FUTURE_STUDENT_MESSAGE = "Являешься ли/учился ли ты на курсе Код Будущего?";
     private static final String YES_I_STUDENT = "Да, я обучался";
     private static final String NO_I_NOT_STUDENT = "Нет, я не обучался";
     private static final String ABOUT_ME_MESSAGE = "Отлично! Последний шаг, расскажи не много о себе";
-    private static final String WAIT_ANSWER = "Ваша заявка принята, ожидайте ответа!";
+    private static final String WAIT_ANSWER = "✅ Ваша заявка принята, ожидайте ответа!";
 
     /**
      * constructor

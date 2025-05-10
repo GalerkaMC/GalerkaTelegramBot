@@ -19,19 +19,19 @@ import java.sql.*;
 public class CommandRouter extends BaseRouter<Update> {
 
     // consts
-    private static final String CANCEL_STATE_MESSAGE = "Действие успешно отменено!";
-    private static final String START_COMMAND_MESSAGE = "Привет! Чтобы подать заявку в вайтлист используй /request!";
-    private static final String NEW_REQUEST_COMMAND_MESSAGE = "Привет! Напиши свой будущий ник в Minecraft";
-    private static final String REQUEST_ALREADY_SEND = "Ты уже отправлял заявку на попадание в белый список, можно отправить только одну. Если не согласен - @Justiks";
-    private static final String GIFT_ALREADY_GET = "Ты уже получал подарок! Если не согласен - @Justiks";
-    private static final String ACCOUNT_ALREADY_LINKED = "К этому телеграм аккаунту уже привязан другой Minecraft аккаунт!";
-    private static final String INCORRECT_LOGIN_OR_PASSWORD = "Некорректный никнейм или пароль! Если это не так - @Justiks";
-    private static final String LINK_NOT_ENOUGH_ARGUMENTS = "Недостаточно аргументов, используйте /link <nickname> <password>";
-    private static final String SUCCESSFUL_LINKED = "Аккаунт успешно привязан!";
+    private static final String CANCEL_STATE_MESSAGE = "✅ Действие успешно отменено!";
+    private static final String START_COMMAND_MESSAGE = "\uD83D\uDC4B Привет! Чтобы подать заявку в вайтлист используй /request!";
+    private static final String NEW_REQUEST_COMMAND_MESSAGE = "Заполни форму. Напиши свой будущий ник в Minecraft";
+    private static final String REQUEST_ALREADY_SEND = "❌ Ты уже отправлял заявку на попадание в белый список, можно отправить только одну. Если не согласен - @Justiks";
+    private static final String GIFT_ALREADY_GET = "✅ Ты уже получал подарок! Если не согласен - @Justiks";
+    private static final String ACCOUNT_ALREADY_LINKED = "❌ К этому телеграм аккаунту уже привязан другой Minecraft аккаунт!";
+    private static final String INCORRECT_LOGIN_OR_PASSWORD = "❌ Некорректный никнейм или пароль! Если это не так - @Justiks";
+    private static final String LINK_NOT_ENOUGH_ARGUMENTS = "❌ Недостаточно аргументов, используйте /link <nickname> <password>";
+    private static final String SUCCESSFUL_LINKED = "✅ Аккаунт успешно привязан!";
     private static final String DATABASE_PATH = "jdbc:sqlite:database.db";
-    private static final String FAIL_SUBSCRIBE_CHECK = "Вы не являетесь подписчиком этого канала!";
-    private static final String ACCOUNT_IS_NOT_LINKED = "К этому телеграмм-аккаунту не привязан ни один Minecraft аккаунт. Для получения подарка привяжите аккаунт (Используйте команду /link или подайте заявку в whitelsit)";
-    private static final String GIFT_SUCCESSFUL_RECEIVED = "Вы успешно получили подарок!";
+    private static final String FAIL_SUBSCRIBE_CHECK = "❌ Вы не являетесь подписчиком этого канала!";
+    private static final String ACCOUNT_IS_NOT_LINKED = "❌ К этому телеграмм-аккаунту не привязан ни один Minecraft аккаунт. Для получения подарка привяжите аккаунт (Используйте команду /link или подайте заявку в whitelsit)";
+    private static final String GIFT_SUCCESSFUL_RECEIVED = "✅ Ты успешно получил подарок!";
 
     /**
      * channel where need check player subscribe
@@ -101,7 +101,7 @@ public class CommandRouter extends BaseRouter<Update> {
         Long userId = update.getMessage().getFrom().getId();
 
         // false if request by this player no exists, else true
-        boolean requestExists = false;
+        boolean requestExists;
 
         // check users exists in who_already_request table
         try (Connection connection = DriverManager.getConnection(Bot.DATABASE_PATH)) {
@@ -154,7 +154,7 @@ public class CommandRouter extends BaseRouter<Update> {
 
         try {
             // if gift already get - cancel
-            if (!giftAlreadyGet) {
+            if (giftAlreadyGet) {
                 Bot.getInstance().getTelegramClient().executeAsync(new SendMessage(userId.toString(), GIFT_ALREADY_GET));
                 return;
             }

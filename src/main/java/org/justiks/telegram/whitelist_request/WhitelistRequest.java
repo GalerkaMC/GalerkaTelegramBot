@@ -22,12 +22,15 @@ import java.sql.*;
 public class WhitelistRequest {
 
     // constants
+    /**
+     * chat with admins where send request
+     */
     private static final String ADMINS_CHAT = "-1002590134862";
 
     // messages
     private static final String REQUEST_MESSAGE = "Новая заявка от игрока %s:\n\nЮзернейм в телеграм: @%s\nПолное имя в телеграм: %s\nMinecraft никнейм: %s\nЕсть лицензия: %s\nУчился на Коде будущего: %s\nНе много о себе: %s";
-    private static final String REQUEST_WAS_REJECTED = "Ваша заявка на попадание в белый список была отклонена.\n\nЗа подробностями писать @Justiks";
-    private static final String REQUEST_ACCEPTED = "Ваша заявка в whitelist была одобрена!\nОдноразовый токен регистрации - %s\n\nПриятной игры!";
+    private static final String REQUEST_WAS_REJECTED = "❌ Ваша заявка на попадание в белый список была отклонена.\n\nЗа подробностями писать @Justiks";
+    private static final String REQUEST_ACCEPTED = "✅ Ваша заявка в whitelist была одобрена!\nОдноразовый токен регистрации - %s\n\nПриятной игры!";
 
     /**
      * player telegram user id
